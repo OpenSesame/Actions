@@ -15,6 +15,8 @@
 
 - We hardcode Github's SSH pubkeys into our known_hosts for security reasons
     - these are gotten via: `ssh-keyscan github.com`
+    - For unknown reasons this no longer works, temporary fix is to ignore host keys
+        - Noted with a FIXME
 - Expects `develop` branch to exist already by convention
     - provides a sane error message if an expected branch does not exist
 
