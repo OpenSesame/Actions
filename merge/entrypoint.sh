@@ -37,15 +37,8 @@ if [[ -z "${DEPLOY_KEY}" ]]; then
 fi
 echo "$DEPLOY_KEY" | ssh-add -
 
-if [[ -n "${TOKEN}" ]]; then
-    # this is automatically provided if passed
-    # see: https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
-    if [[ -z "${GITHUB_TOKEN}" ]]; then
-        export GITHUB_TOKEN="${TOKEN}"
-    fi
-fi
-
-# either it was set above or already set
+# this is automatically provided if passed
+# see: https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 if [[ -z "${GITHUB_TOKEN}" ]]; then
     echo "You must include the GITHUB_TOKEN as an environment variable."
     exit 1

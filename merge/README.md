@@ -52,6 +52,6 @@ jobs:
     - uses: actions/checkout@v1
     - uses: opensesame/Actions/merge@master
       env:
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
 ```
