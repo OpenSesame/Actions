@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # exit on errors
-set -exv
+# add -xv to debug
+set -e
 set -o pipefail
 
 # if set, use that, else default
