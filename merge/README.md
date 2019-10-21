@@ -50,7 +50,7 @@ jobs:
     # checks out out repo to $GITHUB_WORKSPACE
     # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
     - uses: actions/checkout@v1
-    - uses: opensesame/actions/merge@master
+    - uses: opensesame/Actions/merge@master
       env:
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

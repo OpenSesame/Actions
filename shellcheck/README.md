@@ -12,11 +12,11 @@ name: lint
 on: [push]
 
 jobs:
-  merge:
+  shellcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      - uses: opensesame/actions/shellcheck@master
+      - uses: opensesame/Actions/shellcheck@master
 ```
