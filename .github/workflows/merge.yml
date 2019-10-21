@@ -1,0 +1,20 @@
+name: merge
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'release/*'
+      - 'develop'
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+    # checks out out repo to $GITHUB_WORKSPACE
+    # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
+    - uses: actions/checkout@v1
+    - uses: ./merge
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
