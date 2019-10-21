@@ -18,5 +18,5 @@ jobs:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      - uses: ./shellcheck
+      - uses: opensesame/actions/shellcheck@master
 ```
