@@ -9,6 +9,6 @@ RUN curl -s -L -o /tmp/hub.tgz https://github.com/github/hub/releases/download/v
     mv /tmp/hub-linux-amd64-$HUB_VERSION/bin/hub /usr/local/bin
 
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +X /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
