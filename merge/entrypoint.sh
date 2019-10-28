@@ -108,7 +108,7 @@ if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
 fi
 
 # if we're on a release branch
-if [[ "${GITHUB_REF}" =~ refs/heads/release/.* ]]; then
+if [[ "${GITHUB_REF}" =~ ^refs/heads/release/[0-9]{4}$ ]]; then
     # create PR from release => develop
     open_and_merge_pull_request develop;
 fi
