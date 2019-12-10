@@ -40,6 +40,8 @@ main(){
  			-H "${API_HEADER}" \
 			"${URI}/repos/${owner}/${repo}" | jq .default_branch
 		)
+	
+	echo "Debug -> Received ref, owner and repo"
 
 	if [[ "$ref" == "$default_branch" ]]; then
 		# Never delete the default branch.
@@ -91,7 +93,7 @@ main(){
 			"${URI}/repos/${owner}/${repo}/git/refs/heads/${ref}"
 	)
 
-	if [[ ${response} -eq 422 ]] || [[ ${response} -eq 404 ]]; then
+	if [[ ${response} -eq 422 ]]; then
 		echo "The branch is already gone!"
 	elif [[ ${response} -eq 204 ]]; then
 		echo "Branch delete success!"
