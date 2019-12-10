@@ -54,12 +54,19 @@ main(){
 		echo "Will not delete the release or sprint branch, exiting."
 		exit 0
 	fi
-	is_protected=$(
-		curl -XGET -fsSL \
+	http_response=$(
+		curl -XGET --fail -fsSL \
 		-H "${AUTH_HEADER}" \
 		-H "${API_HEADER}" \
-		"${URI}/repos/${owner}/${repo}/branches/${ref}" | jq .protected
-	)
+		"${URI}/repos/${owner}/${repo}/branches/${ref}"
+	) || echo "fail"
+
+	if [[ "$http_response" == "fail" ]]; then
+		echo "Branch was already deleted, exiting."
+		exit 0
+	fi
+
+	is_protected=$(${http_response} | jq .is_protected)
 
 	if [[ "$is_protected" == "true" ]]; then
 		# Never delete protected branches
@@ -75,7 +82,6 @@ main(){
 	)
 	has_pulls_with_ref_as_base=$(echo "$pulls_with_ref_as_base" | jq 'has(0)')
 
-
 	if [[ "$has_pulls_with_ref_as_base" != false ]]; then
 		# Do not delete if the branch is a base branch of another pull request
 		pr=$(echo "$pulls_with_ref_as_base" | jq '.[0].number')
@@ -88,7 +94,7 @@ main(){
 		curl -XDELETE -sSL \
 			-H "${AUTH_HEADER}" \
 			-H "${API_HEADER}" \
-                        --output /dev/null \
+			--output /dev/null \
 			--write-out "%{http_code}" \
 			"${URI}/repos/${owner}/${repo}/git/refs/heads/${ref}"
 	)
