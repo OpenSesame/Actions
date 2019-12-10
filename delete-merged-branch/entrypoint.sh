@@ -40,6 +40,8 @@ main(){
  			-H "${API_HEADER}" \
 			"${URI}/repos/${owner}/${repo}" | jq .default_branch
 		)
+	
+	echo "Debug -> Received ref, owner and repo"
 
 	if [[ "$ref" == "$default_branch" ]]; then
 		# Never delete the default branch.
