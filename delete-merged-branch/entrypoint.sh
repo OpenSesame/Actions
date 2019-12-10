@@ -59,7 +59,9 @@ main(){
 		-H "${AUTH_HEADER}" \
 		-H "${API_HEADER}" \
 		"${URI}/repos/${owner}/${repo}/branches/${ref}"
-	) || $(echo "fail")
+	) || echo "fail"
+
+	echo "DEBUG -> RESPONSE: $http_response"
 
 	if [[ "$http_response" == "fail" ]]; then
 		echo "Branch was already deleted, exiting."
