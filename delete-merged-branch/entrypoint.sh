@@ -91,7 +91,7 @@ main(){
 			"${URI}/repos/${owner}/${repo}/git/refs/heads/${ref}"
 	)
 
-	if [[ ${response} -eq 422 ]]; then
+	if [[ ${response} -eq 422 ]] || [[ ${response} -eq 404 ]]; then
 		echo "The branch is already gone!"
 	elif [[ ${response} -eq 204 ]]; then
 		echo "Branch delete success!"
