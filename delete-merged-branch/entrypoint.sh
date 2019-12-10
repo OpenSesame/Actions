@@ -58,15 +58,13 @@ main(){
 		curl -XGET --fail -fsSL \
 		-H "${AUTH_HEADER}" \
 		-H "${API_HEADER}" \
-		"${URI}/repos/${owner}/${repo}/branches/${ref}"
-	) || $(echo "fail")
+		"${URI}/repos/${owner}/${repo}/branches/${ref}" || echo "fail"
+	)
 
 	if [[ "$http_response" == "fail" ]]; then
 		echo "Branch was already deleted, exiting."
 		exit 0
 	fi
-
-	echo "$http_response" > /response.json
 
 	is_protected=$(/response.json | jq .is_protected)
 
