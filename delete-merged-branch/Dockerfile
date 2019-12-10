@@ -12,6 +12,6 @@ RUN	apk add --no-cache \
 	curl \
 	jq
 
-COPY cleanup-pr-branch /usr/bin/cleanup-pr-branch
+COPY cleanup-pr-branch.sh /usr/bin/cleanup-pr-branch
 
-ENTRYPOINT ["cleanup-pr-branch"]
+ENTRYPOINT ["/usr/bin/cleanup-pr-branch"]
