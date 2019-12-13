@@ -47,10 +47,10 @@ main(){
 		# Never delete the default branch.
 		echo "Will not delete default branch (${default_branch}) for ${owner}/${repo}, exiting."
 		exit 0
-	elif [[ $ref =~ ^(develop|master)$ ]]; then
+	elif [[ "$ref" =~ ^(develop|master)$ ]]; then
 		echo "Will not delete develop or master branch of repo, exiting."
 		exit 0
-	elif [[ $ref =~ ^(release|sprint)\/\d+$ ]]; then
+	elif [[ "$ref" =~ ^(release|sprint)\/.*$ ]]; then
 		echo "Will not delete the release or sprint branch, exiting."
 		exit 0
 	fi
