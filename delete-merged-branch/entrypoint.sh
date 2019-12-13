@@ -66,6 +66,8 @@ main(){
 		exit 0
 	fi
 
+	echo http_response > /response.json
+
 	is_protected=$(/response.json | jq .is_protected)
 
 	if [[ "$is_protected" == "true" ]]; then
