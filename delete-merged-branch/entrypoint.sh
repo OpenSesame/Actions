@@ -66,7 +66,7 @@ main(){
 		exit 0
 	fi
 
-	is_protected=$(/response.json | jq .is_protected)
+	is_protected=$(jq .is_protected <<< "$http_response")
 
 	if [[ "$is_protected" == "true" ]]; then
 		# Never delete protected branches
