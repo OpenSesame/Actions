@@ -85,11 +85,12 @@ function merge_pull_request() {
 #list all open pull requests with labels||url||baseBranch
 PRs="$(hub pr list -f "%L||%U||%B%n")"
 
-for pr in PRs do
-  read -ra Parts <<< "$(echo pr | tr "||" "\n")"
-  label="$Parts[0]"
-  url="$Parts[1]"
-  base="$Parts[2]"
+for $pr in $PRs
+do
+  read -ra Parts <<< "$(echo $pr | tr "||" "\n")"
+  label="${Parts[0]}"
+  url="${Parts[1]}"
+  base="${Parts[2]}"
 
   #case insensitive compare by using the ,, to lower case
   if [ "${label,,}" = "${MERGE_LABEL,,}" ]
