@@ -92,7 +92,7 @@ for pr in PRs do
   base="$Parts[2]"
 
   #case insensitive compare by using the ,, to lower case
-  if [ "${label,,}" = "${MERGE_LABEL,,}"]
+  if [ "${label,,}" = "${MERGE_LABEL,,}" ]
   then
     merge_pull_request "$base" "$url"
   else
