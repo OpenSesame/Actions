@@ -87,7 +87,7 @@ PRs="$(hub pr list -f "%L||%U||%B%n")"
 
 for pr in $PRs
 do
-  read -ra Parts <<< "$(echo $pr | tr "||" "\n")"
+  read -ra Parts <<< "$(echo "$pr" | tr "||" "\n")"
   label="${Parts[0]}"
   url="${Parts[1]}"
   base="${Parts[2]}"
