@@ -85,7 +85,7 @@ function merge_pull_request() {
 #list all open pull requests with labels||url||baseBranch
 PRs="$(hub pr list -f "%L||%U||%B%n")"
 
-for $pr in $PRs
+for pr in $PRs
 do
   read -ra Parts <<< "$(echo $pr | tr "||" "\n")"
   label="${Parts[0]}"
