@@ -7,7 +7,6 @@ set -o pipefail
 
 # if set, use that, else default
 export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-/tmp/ssh_agent.sock}"
-export PULL_REQUEST_TITLE="${PULL_REQUEST_TITLE:-Automated Merge}"
 export GIT_USER_EMAIL="${GIT_USER_EMAIL:-build@opensesame.com}"
 export GIT_USER_NAME="${GIT_USER_NAME:-automerge}"
 
@@ -44,6 +43,11 @@ if [[ -z "${GITHUB_TOKEN}" ]]; then
     exit 1
 fi
 
+if [[ -z "${MERGE_LABEL}" ]]; then
+    echo "You must include the MERGE_LABEL as an environment variable."
+    exit 1
+fi
+
 # actions/checkout step has to be run beforehand
 # this dir is mounted into the container
 cd "${GITHUB_WORKSPACE}"
@@ -54,69 +58,44 @@ git fetch --all
 # clean up merged branches
 git remote prune origin
 
-function open_and_merge_pull_request() {
-    echo "DEBUG: making pull request from ${GITHUB_REF} to $1"
-
-    # if $1 branch does not exist origin
-    if [[ -z "$(git ls-remote origin "$1")" ]]; then
-    echo "Could not find expected branch '$1' on remote 'origin'"
-    fi
+function merge_pull_request() {
+    echo "DEBUG: making pull request from $2 to $1"
 
     # subshell with +e so we continue on errors
     (
         set +e
 
-        # check for existing PRs
-        PR_URL="$(hub pr list -b "$1" -h "${GITHUB_REF}" -s open -f '%U')"
-        if [[ -z "$PR_URL" ]]; then
-            # PR did not exist, create it
-            PR_URL="$(hub pull-request -b "$1" -h "${GITHUB_REF}" -m "${PULL_REQUEST_TITLE}" -l "automerge")"
-        fi
+        # checkout destination branch,
+        # merge PR and push merge commit
+        git fetch origin "${1}" && \
+        git checkout "${1}" && \
+        git reset --hard origin/"${1}"
+        # create merge commit
+        hub merge "${2}" && \
+        echo "DEBUG: successfully merged ${GITHUB_REF} into $1" || \
+        echo "DEBUG: merging ${GITHUB_REF} into $1 failed"
+        # pushes merge commit
+        git push origin "${1}" && \
+        echo "DEBUG: successfully pushed ${GITHUB_REF} merged into $1" || \
+        echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
 
-        if [[ -z "$PR_URL" ]]; then
-            echo "Failed to get PR URL for merge of ${GITHUB_REF} into $1"
-        else
-            # checkout destination branch,
-            # merge PR and push merge commit
-            git fetch origin "${1}" && \
-            git checkout "${1}" && \
-            git reset --hard origin/"${1}"
-            # create merge commit
-            hub merge "${PR_URL}" && \
-            echo "DEBUG: successfully merged ${GITHUB_REF} into $1" || \
-            echo "DEBUG: merging ${GITHUB_REF} into $1 failed"
-            # pushes merge commit
-            git push origin "${1}" && \
-            echo "DEBUG: successfully pushed ${GITHUB_REF} merged into $1" || \
-            echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
-        fi
     )
 }
 
-# if we're on master
-if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
-    # create PR from master => develop
-    open_and_merge_pull_request develop;
-    # create PRs from master => release branches
-    for branch in $(git branch -r | grep -E -o 'origin/release/\d{4}$'); do
-        open_and_merge_pull_request "${branch}";
-    done
-    # create PRs from master => hotfix branches
-    for branch in $(git branch -r | grep -o 'hotfix/.*'); do
-        open_and_merge_pull_request "${branch}";
-    done
-fi
+#list all open pull requests with labels||url||baseBranch
+PRs="$(hub pr list -f "%L||%U||%B%n")"
 
-# if we're on a release branch
-if [[ "${GITHUB_REF}" =~ ^refs/heads/release/[0-9]{4}$ ]]; then
-    # create PR from release => develop
-    open_and_merge_pull_request develop;
-fi
+for pr in PRs do
+  read -ra Parts <<< "$(echo pr | tr "||" "\n")"
+  label="$Parts[0]"
+  url="$Parts[1]"
+  base="$Parts[2]"
 
-# if we're on develop
-if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
-    # create PR from develop => sprint branches
-    for branch in $(git branch -r | grep -o 'sprint/.*'); do
-        open_and_merge_pull_request "${branch}";
-    done
-fi
+  #case insensitive compare by using the ,, to lower case
+  if [ "${label,,}" = "${MERGE_LABEL,,}"]
+  then
+    merge_pull_request "$base" "$url"
+  else
+    echo "DEBUG: PR ignored from $url no matching label ($label)"
+  fi
+done
