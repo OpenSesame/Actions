@@ -9,7 +9,7 @@ jobs:
       # checks out out repo to $GITHUB_WORKSPACE
       # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
       - uses: actions/checkout@v1
-        uses: ./automerge
+      - uses: ./automerge
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
