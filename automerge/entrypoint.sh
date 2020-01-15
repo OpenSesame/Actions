@@ -101,8 +101,10 @@ do
   #case insensitive compare by using the ,, to lower case
   if [ "${label,,}" = "'${MERGE_LABEL,,}'" ] # Notice the single quotes around MERGE_LABEL
   then
+    echo "Merging PR: $url into $base"
     merge_pull_request "$base" "$url"
   else
     echo "DEBUG: PR ignored from $url no matching label ($label)"
   fi
+echo ""
 done <<< "$pull_request_list"
