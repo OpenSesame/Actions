@@ -82,21 +82,27 @@ function merge_pull_request() {
     )
 }
 
-#list all open pull requests with labels||url||baseBranch
-PRs="$(hub pr list -f "%L||%U||%B%n")"
+# list all open pull requests with 'labels'|url|baseBranch
+# The single quotes around the label is necessary since some of our labels have spaces in them
+pull_request_list="$(hub pr list -f "'%L'|%U|%B%n")"
 
-for pr in $PRs
+while read -r pull_request
 do
-  read -ra Parts <<< "$(echo "$pr" | tr "||" "\n")"
-  label="${Parts[0]}"
-  url="${Parts[1]}"
-  base="${Parts[2]}"
+  IFS='|' read -ra parts <<< "$pull_request"
+  label="${parts[0]}"
+  url="${parts[1]}"
+  base="${parts[2]}"
+
+  echo "DEBUG: PR - $pull_request"
+  echo "DEBUG: Label - $label"
+  echo "DEBUG: URL - $url"
+  echo "DEBUG: Base - $base"
 
   #case insensitive compare by using the ,, to lower case
-  if [ "${label,,}" = "${MERGE_LABEL,,}" ]
+  if [ "${label,,}" = "'${MERGE_LABEL,,}'" ] # Notice the single quotes around MERGE_LABEL
   then
     merge_pull_request "$base" "$url"
   else
     echo "DEBUG: PR ignored from $url no matching label ($label)"
   fi
-done
+done <<< "$pull_request_list"
