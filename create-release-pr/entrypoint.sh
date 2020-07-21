@@ -10,6 +10,7 @@ export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-/tmp/ssh_agent.sock}"
 export PULL_REQUEST_TITLE="${PULL_REQUEST_TITLE:-Release PR}"
 export GIT_USER_EMAIL="${GIT_USER_EMAIL:-build@opensesame.com}"
 export GIT_USER_NAME="${GIT_USER_NAME:-automerge}"
+export TARGET_BRANCH="${TARGET_BRANCH:-master}"
 
 # use ssh urls
 git config --global url."git@github.com:".insteadOf "https://github.com/"
@@ -56,11 +57,11 @@ git remote prune origin
 
 function get_release_branch() {
     BRANCH_DATE_STRING=$(date '+%m%d')
-    echo "banana/$BRANCH_DATE_STRING"
+    echo "release/$BRANCH_DATE_STRING"
 }
 
 function open_pull_request() {
-    echo "DEBUG: making pull request from ${GITHUB_REF} to $1"
+    echo "DEBUG: making pull request from $1 to ${TARGET_BRANCH}"
 
     # if $1 branch does not exist origin
     if [[ -z "$(git ls-remote origin "$1")" ]]; then
@@ -72,25 +73,17 @@ function open_pull_request() {
         set +e
 
         # check for existing PRs
-        PR_URL="$(hub pr list -b "${GITHUB_REF}" -h "$1" -s open -f '%U')"
+        PR_URL="$(hub pr list -b "${TARGET_BRANCH}" -h "$1" -s open -f '%U')"
         if [[ -z "$PR_URL" ]]; then
             # PR did not exist, create it
-            PR_URL="$(hub pull-request -b "${GITHUB_REF}" -h "$1" -m "${PULL_REQUEST_TITLE}" -l "release")"
+            PR_URL="$(hub pull-request -b "${TARGET_BRANCH}" -h "$1" -m "${PULL_REQUEST_TITLE}" -l "release")"
         fi
     )
 }
 
-#********* if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
-if [ "${GITHUB_REF}" == "refs/heads/feature/add_release_pr_creation_action" ]; then
-    RELEASE_BRANCH=$(get_release_branch)
-    if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH")" ]]; then
-        echo "Could not find expected branch '$RELEASE_BRANCH' on remote 'origin'"
-        exit 0
-    fi
-    # create PR from master => develop
-    open_pull_request "$RELEASE_BRANCH";
-else
-    echo "This action can only be run on the master branch"
-    exit 1
+RELEASE_BRANCH=$(get_release_branch)
+if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH")" ]]; then
+    echo "Could not find expected branch '$RELEASE_BRANCH' on remote 'origin'"
+    exit 0
 fi
-# This is the end of the script
+open_pull_request "$RELEASE_BRANCH";
