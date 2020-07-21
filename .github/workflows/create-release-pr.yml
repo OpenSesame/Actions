@@ -1,17 +1,17 @@
 name: create-release-pr
 
 on:
-  push:
-    branches:
-      - 'feature/add_release_pr_creation_action'
+  schedule:
+    # Every monday at 4pm UTC (9am PST)
+    - cron: '0 16 * * 1'
+    
 
 jobs:
-  merge:
+  create-release-pr:
     runs-on: ubuntu-latest
     steps:
-    # checks out out repo to $GITHUB_WORKSPACE
     # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: ./create-release-pr
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
