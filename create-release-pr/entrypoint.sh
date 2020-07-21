@@ -80,6 +80,7 @@ function open_pull_request() {
     )
 }
 
+# this is a comment
 #********* if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
 if [ "${GITHUB_REF}" == "refs/heads/feature/add_release_pr_creation_action" ]; then
     RELEASE_BRANCH=$(get_release_branch)
