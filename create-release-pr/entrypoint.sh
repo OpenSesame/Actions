@@ -88,6 +88,6 @@ for ((i = 0 ; i <= MAX_RANGE ; i++)); do
     if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH")" ]]; then
         echo "Could not find expected branch '$RELEASE_BRANCH' on remote 'origin'"
     else
-        echo "making pr"
+        open_pull_request "$RELEASE_BRANCH"
     fi
 done
