@@ -10,6 +10,12 @@ export SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-/tmp/ssh_agent.sock}"
 export PULL_REQUEST_TITLE="${PULL_REQUEST_TITLE:-Release PR}"
 export GIT_USER_EMAIL="${GIT_USER_EMAIL:-build@opensesame.com}"
 export GIT_USER_NAME="${GIT_USER_NAME:-automerge}"
+<<<<<<< HEAD
+=======
+export TARGET_BRANCH="${TARGET_BRANCH:-master}"
+export RELEASE_BRANCH_PREFIX="${RELEASE_BRANCH_PREFIX:-release/}"
+export MAX_RANGE="${MAX_RANGE:-1}"
+>>>>>>> eb1c71084f7b454cbb9abd42a5051e617b7693b1
 
 # use ssh urls
 git config --global url."git@github.com:".insteadOf "https://github.com/"
@@ -55,12 +61,21 @@ git fetch --all
 git remote prune origin
 
 function get_release_branch() {
+<<<<<<< HEAD
     BRANCH_DATE_STRING=$(date '+%m%d')
     echo "release/$BRANCH_DATE_STRING"
 }
 
 function open_pull_request() {
     echo "DEBUG: making pull request from ${GITHUB_REF} to $1"
+=======
+    BRANCH_DATE_STRING=$(date -d "+$1 day" '+%m%d')
+    echo "$RELEASE_BRANCH_PREFIX$BRANCH_DATE_STRING"
+}
+
+function open_pull_request() {
+    echo "DEBUG: making pull request from $1 to ${TARGET_BRANCH}"
+>>>>>>> eb1c71084f7b454cbb9abd42a5051e617b7693b1
 
     # if $1 branch does not exist origin
     if [[ -z "$(git ls-remote origin "$1")" ]]; then
@@ -72,14 +87,22 @@ function open_pull_request() {
         set +e
 
         # check for existing PRs
+<<<<<<< HEAD
         PR_URL="$(hub pr list -b "$1" -h "${GITHUB_REF}" -s open -f '%U')"
         if [[ -z "$PR_URL" ]]; then
             # PR did not exist, create it
             PR_URL="$(hub pull-request -b "$1" -h "${GITHUB_REF}" -m "${PULL_REQUEST_TITLE}" -l "automerge")"
+=======
+        PR_URL="$(hub pr list -b "${TARGET_BRANCH}" -h "$1" -s open -f '%U')"
+        if [[ -z "$PR_URL" ]]; then
+            # PR did not exist, create it
+            PR_URL="$(hub pull-request -b "${TARGET_BRANCH}" -h "$1" -m "${PULL_REQUEST_TITLE}" -l "release")"
+>>>>>>> eb1c71084f7b454cbb9abd42a5051e617b7693b1
         fi
     )
 }
 
+<<<<<<< HEAD
 #********* if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
 if [ "${GITHUB_REF}" == "refs/heads/feature/add_release_pr_creation_action" ]; then
     RELEASE_BRANCH=$(get_release_branch)
@@ -93,3 +116,13 @@ else
     echo "This action can only be run on the master branch"
     exit 1
 fi
+=======
+for ((i = 0 ; i <= MAX_RANGE ; i++)); do
+    RELEASE_BRANCH=$(get_release_branch "$i")
+    if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH")" ]]; then
+        echo "Could not find expected branch '$RELEASE_BRANCH' on remote 'origin'"
+    else
+        open_pull_request "$RELEASE_BRANCH"
+    fi
+done
+>>>>>>> eb1c71084f7b454cbb9abd42a5051e617b7693b1
