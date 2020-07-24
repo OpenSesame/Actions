@@ -1,0 +1,18 @@
+name: create-release-pr
+
+on:
+  schedule:
+    # Every monday at 4pm UTC (9am PST)
+    - cron: '0 16 * * 1'
+    
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+    # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
+    - uses: actions/checkout@v2
+    - uses: ./create-release-pr
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
