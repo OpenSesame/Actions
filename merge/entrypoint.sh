@@ -99,7 +99,7 @@ if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
     open_and_merge_pull_request develop;
 
     # create PRs from master => release branches
-    for branch in $(git branch -r | grep -E -o 'origin/release/[0-9]{4}$'); do
+    for branch in $(git branch -r | grep -E -o 'release/[0-9]{4}$'); do
         open_and_merge_pull_request "${branch}";
     done
     
