@@ -102,9 +102,37 @@ if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
     for branch in $(git branch -r | grep -E -o 'release/[0-9]{4}$'); do
         open_and_merge_pull_request "${branch}";
     done
-    
+
     # create PRs from master => hotfix branches
     for branch in $(git branch -r | grep -o 'hotfix/.*'); do
+        open_and_merge_pull_request "${branch}";
+    done
+fi
+
+# if we're on main
+if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+    # create PR from main => develop
+    if [[ -n "$(git ls-remote origin "develop")" ]]; then
+        open_and_merge_pull_request develop;
+    fi
+
+    # create PR from main => next
+    if [[ -n "$(git ls-remote origin "next")" ]]; then
+        open_and_merge_pull_request next;
+    fi
+
+    # create PRs from main => release branches
+    for branch in $(git branch -r | grep -E -o 'release/[0-9]{4}$'); do
+        open_and_merge_pull_request "${branch}";
+    done
+
+    # create PRs from main => hotfix branches
+    for branch in $(git branch -r | grep -o 'hotfix/.*'); do
+        open_and_merge_pull_request "${branch}";
+    done
+
+    # create PRs from main => patch branches
+    for branch in $(git branch -r | grep -o 'patch/.*'); do
         open_and_merge_pull_request "${branch}";
     done
 fi
