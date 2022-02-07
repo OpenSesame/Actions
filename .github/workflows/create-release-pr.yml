@@ -4,6 +4,7 @@ on:
   schedule:
     # Every monday at 4pm UTC (9am PST)
     - cron: '0 16 * * 1'
+  workflow_dispatch:
     
 
 jobs:
