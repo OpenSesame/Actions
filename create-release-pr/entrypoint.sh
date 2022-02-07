@@ -11,7 +11,7 @@ export PULL_REQUEST_TITLE="${PULL_REQUEST_TITLE:-Release PR}"
 export GIT_USER_EMAIL="${GIT_USER_EMAIL:-build@opensesame.com}"
 export GIT_USER_NAME="${GIT_USER_NAME:-automerge}"
 export TARGET_BRANCH="${TARGET_BRANCH:-master}"
-export RELEASE_BRANCH_NAME= "${RELEASE_BRANCH_NAME:-release/0000}"
+export RELEASE_BRANCH_NAME="${RELEASE_BRANCH_NAME:-release/0000}"
 
 # use ssh urls
 git config --global url."git@github.com:".insteadOf "https://github.com/"
