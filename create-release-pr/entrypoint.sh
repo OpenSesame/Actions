@@ -11,8 +11,7 @@ export PULL_REQUEST_TITLE="${PULL_REQUEST_TITLE:-Release PR}"
 export GIT_USER_EMAIL="${GIT_USER_EMAIL:-build@opensesame.com}"
 export GIT_USER_NAME="${GIT_USER_NAME:-automerge}"
 export TARGET_BRANCH="${TARGET_BRANCH:-master}"
-export RELEASE_BRANCH_PREFIX="${RELEASE_BRANCH_PREFIX:-release/}"
-export MAX_RANGE="${MAX_RANGE:-1}"
+export RELEASE_BRANCH_NAME="${RELEASE_BRANCH_NAME:-release/0000}"
 
 # use ssh urls
 git config --global url."git@github.com:".insteadOf "https://github.com/"
@@ -57,11 +56,6 @@ git fetch --all
 # clean up merged branches
 git remote prune origin
 
-function get_release_branch() {
-    BRANCH_DATE_STRING=$(date -d "+$1 day" '+%m%d')
-    echo "$RELEASE_BRANCH_PREFIX$BRANCH_DATE_STRING"
-}
-
 function open_pull_request() {
     echo "DEBUG: making pull request from $1 to ${TARGET_BRANCH}"
 
@@ -83,11 +77,8 @@ function open_pull_request() {
     )
 }
 
-for ((i = 0 ; i <= MAX_RANGE ; i++)); do
-    RELEASE_BRANCH=$(get_release_branch "$i")
-    if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH")" ]]; then
-        echo "Could not find expected branch '$RELEASE_BRANCH' on remote 'origin'"
-    else
-        open_pull_request "$RELEASE_BRANCH"
-    fi
-done
+if [[ -z "$(git ls-remote origin "$RELEASE_BRANCH_NAME")" ]]; then
+    echo "Could not find expected branch '$RELEASE_BRANCH_NAME' on remote 'origin'"
+else
+    open_pull_request "$RELEASE_BRANCH_NAME"
+fi
