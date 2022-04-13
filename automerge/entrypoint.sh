@@ -48,6 +48,9 @@ if [[ -z "${MERGE_LABEL}" ]]; then
     exit 1
 fi
 
+# the github workspace needs to be registered as a safe directory
+git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
 # actions/checkout step has to be run beforehand
 # this dir is mounted into the container
 cd "${GITHUB_WORKSPACE}"
