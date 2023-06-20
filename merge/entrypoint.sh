@@ -88,10 +88,6 @@ function open_and_merge_pull_request() {
             hub merge "${PR_URL}" && \
             echo "DEBUG: successfully merged ${GITHUB_REF} into $1" || \
             echo "DEBUG: merging ${GITHUB_REF} into $1 failed"
-            # pushes merge commit
-            git push origin "${1}" && \
-            echo "DEBUG: successfully pushed ${GITHUB_REF} merged into $1" || \
-            echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
         fi
     )
 }
