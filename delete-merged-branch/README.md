@@ -1,4 +1,4 @@
-# Branch Cleanup Action
+# Delete Merged Branch
 
 [![Travis CI](https://img.shields.io/travis/jessfraz/branch-cleanup-action.svg?style=for-the-badge)](https://travis-ci.org/jessfraz/branch-cleanup-action)
 
