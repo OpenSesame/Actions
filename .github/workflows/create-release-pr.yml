@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # note: this has to be a full clone to avoid "fatal: refusing to merge unrelated histories"
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ./create-release-pr
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
