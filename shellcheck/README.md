@@ -1,12 +1,14 @@
-### Behavior
+# Shellcheck
+
+## Behavior
 
 Runs [shellcheck](https://github.com/koalaman/shellcheck) on all files matching `*.sh` in the repo.
 
-### Usage
+## Usage
 
 Include the shellcheck action in a workflow, for example:
 
-```
+```yaml
 name: lint
 
 on: [push]
@@ -18,5 +20,5 @@ jobs:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      - uses: opensesame/Actions/shellcheck@master
+      - uses: opensesame/Actions/shellcheck@v1
 ```
