@@ -57,12 +57,14 @@ git fetch --all
 # clean up merged branches
 git remote prune origin
 
+failures=()
+
 function open_and_merge_pull_request() {
     echo "DEBUG: making pull request from ${GITHUB_REF} to $1"
 
     # if $1 branch does not exist origin
     if [[ -z "$(git ls-remote origin "$1")" ]]; then
-    echo "Could not find expected branch '$1' on remote 'origin'"
+        echo "Could not find expected branch '$1' on remote 'origin'"
     fi
 
     # subshell with +e so we continue on errors
@@ -70,28 +72,37 @@ function open_and_merge_pull_request() {
         set +e
 
         # check for existing PRs
-        PR_URL="$(hub pr list -b "$1" -h "${GITHUB_REF}" -s open -f '%U')"
+        PR_URL="$(HUB_VERBOSE=1 hub pr list -b "$1" -h "${GITHUB_REF}" -s open -f '%U')"
         if [[ -z "$PR_URL" ]]; then
             # PR did not exist, create it
-            PR_URL="$(hub pull-request -b "$1" -h "${GITHUB_REF}" -m "${PULL_REQUEST_TITLE}" -l "automerge")"
+            PR_URL="$(HUB_VERBOSE=1 hub pull-request -b "$1" -h "${GITHUB_REF}" -m "${PULL_REQUEST_TITLE}" -l "automerge")"
         fi
 
         if [[ -z "$PR_URL" ]]; then
             echo "Failed to get PR URL for merge of ${GITHUB_REF} into $1"
+            return 1
         else
             # checkout destination branch,
             # merge PR and push merge commit
             git fetch origin "${1}" && \
             git checkout "${1}" && \
             git reset --hard origin/"${1}"
+
             # create merge commit
-            hub merge "${PR_URL}" && \
-            echo "DEBUG: successfully merged ${GITHUB_REF} into $1" || \
-            echo "DEBUG: merging ${GITHUB_REF} into $1 failed"
+            if ! hub merge "${PR_URL}"; then
+                echo "DEBUG: merging ${GITHUB_REF} into $1 failed"
+                return 1
+            fi
+
+            echo "DEBUG: successfully merged ${GITHUB_REF} into $1"
+
             # pushes merge commit
-            git push origin "${1}" && \
-            echo "DEBUG: successfully pushed ${GITHUB_REF} merged into $1" || \
-            echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
+            if ! git push origin "${1}"; then
+                echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
+                return 1
+            fi
+
+            echo "DEBUG: successfully pushed ${GITHUB_REF} merged into $1"
         fi
     )
 }
@@ -99,16 +110,22 @@ function open_and_merge_pull_request() {
 # if we're on master
 if [ "${GITHUB_REF}" == "refs/heads/master" ]; then
     # create PR from master => develop
-    open_and_merge_pull_request develop;
+    if ! open_and_merge_pull_request develop; then
+        failures+=("develop")
+    fi
 
     # create PRs from master => release branches
     for branch in $(git branch -r | grep -E -o 'release/[0-9]{4}$'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
 
     # create PRs from master => hotfix branches
     for branch in $(git branch -r | grep -o 'hotfix/.*'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
 fi
 
@@ -116,40 +133,62 @@ fi
 if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
     # create PR from main => develop
     if [[ -n "$(git ls-remote origin "develop")" ]]; then
-        open_and_merge_pull_request develop;
+        if ! open_and_merge_pull_request develop; then
+            failures+=("develop")
+        fi
     fi
 
     # create PR from main => next
     if [[ -n "$(git ls-remote origin "next")" ]]; then
-        open_and_merge_pull_request next;
+        if ! open_and_merge_pull_request next; then
+            failures+=("next")
+        fi
     fi
 
     # create PRs from main => release branches
     for branch in $(git branch -r | grep -E -o 'release/[0-9]{4}$'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
 
     # create PRs from main => hotfix branches
     for branch in $(git branch -r | grep -o 'hotfix/.*'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
 
     # create PRs from main => patch branches
     for branch in $(git branch -r | grep -o 'patch/.*'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
 fi
 
 # if we're on a release branch
 if [[ "${GITHUB_REF}" =~ ^refs/heads/release/[0-9]{4}$ ]]; then
     # create PR from release => develop
-    open_and_merge_pull_request develop;
+    if ! open_and_merge_pull_request develop; then
+        failures+=("develop")
+    fi
 fi
 
 # if we're on develop
 if [ "${GITHUB_REF}" == "refs/heads/develop" ]; then
     # create PR from develop => sprint branches
     for branch in $(git branch -r | grep -o 'sprint/.*'); do
-        open_and_merge_pull_request "${branch}";
+        if ! open_and_merge_pull_request "${branch}"; then
+            failures+=("${branch}")
+        fi
     done
+fi
+
+if ((${#failures[@]})); then
+    echo "One or more merges failed:"
+    printf ' - %s\n' "${failures[@]}"
+    exit 1
+else
+    echo "All merges succeeded."
 fi
