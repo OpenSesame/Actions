@@ -99,6 +99,9 @@ function open_and_merge_pull_request() {
             # pushes merge commit
             if ! git push origin "${1}"; then
                 echo "DEBUG: pushing ${GITHUB_REF} merged into $1 failed"
+                echo "DEBUG: reverting back to origin/${1} so subsequent"
+                echo "DEBUG: steps can work with a clean working tree"
+                git reset --hard "origin/${1}"
                 return 1
             fi
 
