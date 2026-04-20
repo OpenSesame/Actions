@@ -61,20 +61,21 @@ failures=()
 
 function open_and_merge_pull_request() {
     local source_branch="${GITHUB_REF#refs/heads/}"
-    local ahead_count
 
     echo "DEBUG: making pull request from ${GITHUB_REF} to $1"
 
     # if destination branch does not exist on origin
     if [[ -z "$(git ls-remote origin "$1")" ]]; then
         echo "Could not find expected branch '$1' on remote 'origin'"
+        return 1
     fi
 
     # Skip no-op merges so identical branches do not fail PR creation with
     # "No commits between ..." validation errors.
-    ahead_count="$(git rev-list --count "origin/$1..origin/${source_branch}")"
+    local ahead_commit
+    ahead_commit="$(git rev-list --max-count=1 "origin/$1..origin/${source_branch}")"
 
-    if [[ "${ahead_count}" == "0" ]]; then
+    if [[ -z "${ahead_commit}" ]]; then
         echo "DEBUG: skipping merge of ${GITHUB_REF} into $1; ${source_branch} has no commits ahead of $1"
         return 0
     fi
